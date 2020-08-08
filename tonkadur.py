@@ -119,7 +119,7 @@ class Tonkadur:
             else:
                 return self.compute(computation['if_false'])
         elif (computation_category == "new"):
-            address = ".alloc." + self.allocated_data
+            address = ".alloc." + str(self.allocated_data)
             self.allocated_data += 1
             self.memory[address] = self.generate_instance_of(computation['target'])
 
@@ -157,7 +157,11 @@ class Tonkadur:
                 print("unknown operator " + operator)
 
         elif (computation_category == "ref"):
-            return [self.compute(computation['address'])]
+            result = self.compute(computation['address'])
+            if (isinstance(result, list)):
+                return result
+            else:
+                return [result]
         elif (computation_category == "relative_ref"):
             base = self.compute(computation['base'])
             base.append(self.compute(computation['extra']))
@@ -181,7 +185,7 @@ class Tonkadur:
         elif (computation_category == "value_of"):
             target = self.memory
             access = self.compute(computation['reference'])
-
+            #print("Reading: " + str(access))
             for addr in access:
                 target = target[addr]
 
@@ -268,7 +272,9 @@ class Tonkadur:
                 pre_val = self.memory
                 current_val = pre_val
                 last_access = ""
+                #print("Reference:" + str(instruction["reference"]))
                 access_full = self.compute(instruction["reference"])
+                #print("Writing: " + str(access_full))
 
                 for access in access_full:
                     pre_val = current_val
