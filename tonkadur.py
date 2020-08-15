@@ -198,7 +198,6 @@ class Tonkadur:
                 target = target[addr]
             #    if (isinstance(target, list)):
             #        print("That's a list.")
-
             return target
 
     def resolve_choice_to (self, line):
@@ -295,7 +294,13 @@ class Tonkadur:
                     if (access in current_val):
                         current_val = current_val[access]
 
-                pre_val[last_access] = self.compute(instruction["value"])
+
+                result = self.compute(instruction["value"])
+
+                if (isinstance(result, list) or isinstance(result, dict)):
+                    result = copy.deepcopy(result)
+
+                pre_val[last_access] = result
 
                 self.program_counter += 1
 
