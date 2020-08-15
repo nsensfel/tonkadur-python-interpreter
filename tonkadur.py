@@ -122,6 +122,7 @@ class Tonkadur:
             address = ".alloc." + str(self.allocated_data)
             self.allocated_data += 1
             self.memory[address] = self.generate_instance_of(computation['target'])
+            #print("Allocated " + str(address) + " = " + str(self.memory[address]))
 
             return [address]
         elif (computation_category == "operation"):
@@ -156,14 +157,14 @@ class Tonkadur:
             else:
                 print("unknown operator " + operator)
 
-        elif (computation_category == "ref"):
+        elif (computation_category == "address"):
             result = self.compute(computation['address'])
             if (isinstance(result, list)):
                 return result
             else:
                 return [result]
-        elif (computation_category == "relative_ref"):
-            base = self.compute(computation['base'])
+        elif (computation_category == "relative_address"):
+            base = self.compute(computation['base']).copy()
             base.append(self.compute(computation['extra']))
             return base
         elif (computation_category == "rich_text"):
@@ -172,6 +173,12 @@ class Tonkadur:
             result['content'] = []
             for c in computation['content']:
                 result['content'].append(self.compute(c))
+
+            return result
+        elif (computation_category == "newline"):
+            result = dict()
+            result['effect'] = None
+            result['content'] = ['\n']
 
             return result
         elif (computation_category == "size"):
@@ -185,9 +192,12 @@ class Tonkadur:
         elif (computation_category == "value_of"):
             target = self.memory
             access = self.compute(computation['reference'])
-            #print("Reading: " + str(access))
             for addr in access:
+                #print("Reading " + str(addr) + " of " + str(target))
+            #    print("addr = " + str(addr))
                 target = target[addr]
+            #    if (isinstance(target, list)):
+            #        print("That's a list.")
 
             return target
 
@@ -197,6 +207,7 @@ class Tonkadur:
 
     def run (self):
         while True:
+            #print("\nmemory: " + str(self.memory))
             #print("\nline: " + str(self.program_counter))
             instruction = self.code[self.program_counter]
             instruction_category = instruction['category']
@@ -257,6 +268,7 @@ class Tonkadur:
                     last_access = access
                     current_val = current_val[access]
 
+                #print("Removing " + str(last_access) + " of " + str(pre_val))
                 del pre_val[last_access]
 
                 self.program_counter += 1
@@ -279,6 +291,7 @@ class Tonkadur:
                 for access in access_full:
                     pre_val = current_val
                     last_access = access
+                    #print("Writing " + str(access) + " of " + str(current_val))
                     if (access in current_val):
                         current_val = current_val[access]
 
