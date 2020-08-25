@@ -5,7 +5,7 @@ import random
 
 class Tonkadur:
     def generate_instance_of (self, typedef):
-        if (typedef['category'] == "boolean"):
+        if (typedef['category'] == "bool"):
             return False
         elif (typedef['category'] == "float"):
             return 0.0
@@ -86,7 +86,7 @@ class Tonkadur:
                 return str(content)
             elif (target_type == "float"):
                 return float(content)
-            elif (target_type == "boolean"):
+            elif (target_type == "bool"):
                 if (origin_type == "string"):
                     return (content == "true")
                 elif (origin_type == "int"):
@@ -104,7 +104,7 @@ class Tonkadur:
                 return content
             elif (target_type == "float"):
                 return float(content)
-            elif (target_type == "boolean"):
+            elif (target_type == "bool"):
                 return (content == "true")
             elif (target_type == "int"):
                 return int(content)
