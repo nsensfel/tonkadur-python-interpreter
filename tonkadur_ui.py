@@ -17,6 +17,22 @@ parser.add_argument(
     help = 'Wyrd JSON file to load.',
 )
 
+def display_rich_text (rich_text):
+    str_content = ""
+
+    if (not (rich_text['effect'] is None)):
+        str_content += "{(" + str(rich_text['effect']) + ") "
+
+    for c in rich_text['content']:
+        if (isinstance(c, str)):
+            str_content += c
+        else:
+            str_content += display_rich_text(c)
+
+    if (not (rich_text['effect'] is None)):
+        str_content = "}"
+    return str_content
+
 args = parser.parse_args()
 state = tonkadur.Tonkadur(args.world_file)
 
@@ -29,15 +45,15 @@ try:
             print("Program ended")
             break
         elif (result_category == "display"):
-            print(result['content'])
+            print(display_rich_text(result['content']))
         elif (result_category == "assert"):
-            print("Assert failed at line " + str(result['line']) + ":" + str(result['message']))
+            print("Assert failed at line " + str(result['line']) + ":" + str(display_rich_text(result['message'])))
             print(str(state.memory))
         elif (result_category == "resolve_choices"):
             current_choice = 0;
 
             for choice in result['choices']:
-                print(str(current_choice) + ". " + ''.join(choice[0]['content']))
+                print(str(current_choice) + ". " + display_rich_text(choice[0]))
                 current_choice += 1
 
             user_choice = input("Your choice? ")
