@@ -30,7 +30,7 @@ def display_rich_text (rich_text):
             str_content += display_rich_text(c)
 
     if (not (rich_text['effect'] is None)):
-        str_content = "}"
+        str_content += "}"
     return str_content
 
 args = parser.parse_args()

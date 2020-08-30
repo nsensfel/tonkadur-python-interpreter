@@ -188,15 +188,19 @@ class Tonkadur:
             access = self.compute(computation['reference'])
 
             for addr in access:
-                target = target[addr]
+                if (not (addr in target)):
+                    return 0
+                else:
+                    target = target[addr]
 
             return len(target)
         elif (computation_category == "value_of"):
             target = self.memory
             access = self.compute(computation['reference'])
+            #print("(value_of " + str(access) + ")")
             for addr in access:
-                #print("Reading " + str(addr) + " of " + str(target))
-            #    print("addr = " + str(addr))
+               # print("Reading " + str(addr) + " of " + str(target))
+               # print("addr = " + str(addr))
                 target = target[addr]
             #    if (isinstance(target, list)):
             #        print("That's a list.")
