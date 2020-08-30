@@ -57,7 +57,7 @@ try:
                 current_choice += 1
 
             user_choice = input("Your choice? ")
-            state.resolve_choice_to(result['choices'][int(user_choice)][1])
+            state.resolve_choice_to(int(user_choice))
         elif (result_category == "event"):
             print("Unhandled event:" + str(result))
 

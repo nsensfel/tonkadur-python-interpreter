@@ -32,6 +32,7 @@ class Tonkadur:
         self.code = []
         self.program_counter = 0
         self.allocated_data = 0
+        self.last_choice_index = -1
         self.available_choices = []
 
         with open(json_file, 'r') as f:
@@ -199,10 +200,14 @@ class Tonkadur:
             #    if (isinstance(target, list)):
             #        print("That's a list.")
             return target
+        elif (computation_category == "last_choice_index"):
+            return self.last_choice_index
+        else:
+            print("Unknown Wyrd computation: \"" + computation_category + "\"")
 
-    def resolve_choice_to (self, line):
+    def resolve_choice_to (self, index):
         self.available_choices = []
-        self.program_counter = line
+        self.last_choice_index = index
 
     def run (self):
         while True:
@@ -215,8 +220,7 @@ class Tonkadur:
             if (instruction_category == "add_choice"):
                 self.available_choices.append(
                     [
-                        self.compute(instruction['label']),
-                        self.compute(instruction['address'])
+                        self.compute(instruction['label'])
                     ]
                 )
                 self.program_counter += 1
@@ -275,6 +279,7 @@ class Tonkadur:
                 result = dict()
                 result["category"] = "resolve_choices"
                 result["choices"] = self.available_choices
+                self.program_counter += 1
 
                 return result
             elif (instruction_category == "set_pc"):
@@ -303,4 +308,6 @@ class Tonkadur:
                 pre_val[last_access] = result
 
                 self.program_counter += 1
+            else:
+                print("Unknown Wyrd instruction: \"" + instruction_category + "\"")
 
