@@ -46,6 +46,47 @@ try:
             break
         elif (result_category == "display"):
             print(display_rich_text(result['content']))
+        elif (result_category == "prompt_integer"):
+            while True:
+                user_input = input(
+                    display_rich_text(result['label'])
+                    + " "
+                    + "["
+                    + str(result['min'])
+                    + ", "
+                    + str(result['max'])
+                    + "] "
+                )
+                user_input = int(user_input)
+                if (
+                    (user_input >= result['min'])
+                    and (user_input <= result['max'])
+                ):
+                    break
+                else:
+                    print("Value not within range.")
+            state.store_integer(user_input)
+
+        elif (result_category == "prompt_string"):
+            while True:
+                user_input = input(
+                    display_rich_text(result['label'])
+                    + " "
+                    + "["
+                    + str(result['min'])
+                    + ", "
+                    + str(result['max'])
+                    + "] "
+                )
+                if (
+                    (len(user_input) >= result['min'])
+                    and (len(user_input) <= result['max'])
+                ):
+                    break
+                else:
+                    print("Input size not within range.")
+            state.store_string(user_input)
+
         elif (result_category == "assert"):
             print("Assert failed at line " + str(result['line']) + ":" + str(display_rich_text(result['message'])))
             print(str(state.memory))
@@ -53,7 +94,7 @@ try:
             current_choice = 0;
 
             for choice in result['choices']:
-                print(str(current_choice) + ". " + display_rich_text(choice[0]))
+                print(str(current_choice) + ". " + display_rich_text(choice))
                 current_choice += 1
 
             user_choice = input("Your choice? ")

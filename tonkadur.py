@@ -34,6 +34,7 @@ class Tonkadur:
         self.allocated_data = 0
         self.last_choice_index = -1
         self.available_choices = []
+        self.memorized_target = []
 
         with open(json_file, 'r') as f:
             json_content = json.load(f)
@@ -209,6 +210,28 @@ class Tonkadur:
         self.available_choices = []
         self.last_choice_index = index
 
+    def store_integer (self, value):
+        current_val = self.memory
+
+        for access in self.memorized_target:
+            pre_val = current_val
+            last_access = access
+            if (access in current_val):
+                current_val = current_val[access]
+
+        pre_val[last_access] = value
+
+    def store_string (self, value):
+        current_val = self.memory
+
+        for access in self.memorized_target:
+            pre_val = current_val
+            last_access = access
+            if (access in current_val):
+                current_val = current_val[access]
+
+        pre_val[last_access] = value
+
     def run (self):
         while True:
             #print("\nmemory: " + str(self.memory))
@@ -219,9 +242,7 @@ class Tonkadur:
 
             if (instruction_category == "add_choice"):
                 self.available_choices.append(
-                    [
-                        self.compute(instruction['label'])
-                    ]
+                    self.compute(instruction['label'])
                 )
                 self.program_counter += 1
             elif (instruction_category == "assert"):
@@ -308,6 +329,31 @@ class Tonkadur:
                 pre_val[last_access] = result
 
                 self.program_counter += 1
+            elif (instruction_category == "prompt_integer"):
+                result = dict()
+                result["category"] = "prompt_integer"
+                result["min"] = self.compute(instruction['min'])
+                result["max"] = self.compute(instruction['max'])
+                result["label"] = self.compute(instruction['label'])
+
+                self.memorized_target = self.compute(instruction['target'])
+
+                self.program_counter += 1
+
+                return result
+
+            elif (instruction_category == "prompt_string"):
+                result = dict()
+                result["category"] = "prompt_string"
+                result["min"] = self.compute(instruction['min'])
+                result["max"] = self.compute(instruction['max'])
+                result["label"] = self.compute(instruction['label'])
+
+                self.memorized_target = self.compute(instruction['target'])
+
+                self.program_counter += 1
+
+                return result
             else:
                 print("Unknown Wyrd instruction: \"" + instruction_category + "\"")
 
