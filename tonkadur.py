@@ -48,10 +48,6 @@ class Tonkadur:
 
                 self.types[typedef['name']] = new_type
 
-            #### INITIALIZE VARIABLES ##########################################
-            for vardef in json_content['variables']:
-                self.memory[vardef['name']] = self.generate_instance_of(vardef['type'])
-
             #### INITIALIZE SEQUENCES ##########################################
             for seqdef in json_content['sequences']:
                 self.sequences[seqdef['name']] = seqdef['line']
@@ -310,27 +306,30 @@ class Tonkadur:
             elif (instruction_category == "set_pc"):
                 self.program_counter = self.compute(instruction["value"])
             elif (instruction_category == "set_value"):
-                pre_val = self.memory
-                current_val = pre_val
-                last_access = ""
+                current_val = self.memory
                 #print("Reference:" + str(instruction["reference"]))
                 access_full = self.compute(instruction["reference"])
                 #print("Writing: " + str(access_full))
 
-                for access in access_full:
-                    pre_val = current_val
-                    last_access = access
-                    #print("Writing " + str(access) + " of " + str(current_val))
-                    if (access in current_val):
-                        current_val = current_val[access]
-
+                for access in access_full[:-1]:
+                    current_val = current_val[access]
 
                 result = self.compute(instruction["value"])
 
                 if (isinstance(result, list) or isinstance(result, dict)):
                     result = copy.deepcopy(result)
 
-                pre_val[last_access] = result
+                current_val[access_full[-1]] = result
+
+                self.program_counter += 1
+            elif (instruction_category == "initialize"):
+                current_val = self.memory
+                access_full = self.compute(instruction["reference"])
+
+                for access in access_full[:-1]:
+                    current_val = current_val[access]
+
+                current_val[access_full[-1]] = self.generate_instance_of(instruction["type"])
 
                 self.program_counter += 1
             elif (instruction_category == "prompt_integer"):

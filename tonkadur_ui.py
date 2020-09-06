@@ -103,7 +103,7 @@ try:
             print("Unhandled event:" + str(result))
 
 except:
-    print("failed.\n")
+    print("failed at line " + str(state.program_counter) + ".\n")
     print(str(state.memory))
     raise
 print(str(state.memory))
