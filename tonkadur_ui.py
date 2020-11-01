@@ -94,7 +94,12 @@ try:
             current_choice = 0;
 
             for choice in result['choices']:
-                print(str(current_choice) + ". " + display_rich_text(choice))
+                if (choice["category"] == "option"):
+                    print(
+                        str(current_choice)
+                        + ". "
+                        + display_rich_text(choice["label"])
+                    )
                 current_choice += 1
 
             user_choice = input("Your choice? ")

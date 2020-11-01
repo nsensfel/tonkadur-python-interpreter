@@ -23,7 +23,10 @@ class Tonkadur:
         elif (typedef['category'] == "pointer"):
             return []
         elif (typedef['category'] == "structure"):
-            return copy.deepcopy(self.types[typedef['name']])
+            if (typedef['name'] == "wild dict"):
+                return dict()
+            else:
+                return copy.deepcopy(self.types[typedef['name']])
 
     def __init__ (self, json_file):
         self.memory = dict()
@@ -198,8 +201,8 @@ class Tonkadur:
                # print("Reading " + str(addr) + " of " + str(target))
                # print("addr = " + str(addr))
                 target = target[addr]
-            #    if (isinstance(target, list)):
-            #        print("That's a list.")
+               # if (isinstance(target, list)):
+               #     print("That's a list.")
             return target
         elif (computation_category == "last_choice_index"):
             return self.last_choice_index
@@ -241,9 +244,22 @@ class Tonkadur:
             #print("instruction:" + str(instruction))
 
             if (instruction_category == "add_choice"):
-                self.available_choices.append(
-                    self.compute(instruction['label'])
-                )
+                result = dict()
+                result["category"] = "option"
+                result["label"] = self.compute(instruction['label'])
+                self.available_choices.append(result)
+                self.program_counter += 1
+            elif (instruction_category == "add_event_input"):
+                result = dict()
+                result["category"] = "event"
+                result["name"] = instruction["event"]
+                params = []
+
+                for param in instruction['parameters']:
+                    params.append(self.compute(param))
+
+                result["parameters"] = params
+                self.available_choices.append(result)
                 self.program_counter += 1
             elif (instruction_category == "assert"):
                 condition = self.compute(instruction['condition'])
