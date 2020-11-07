@@ -84,7 +84,11 @@ class Tonkadur:
             content = self.compute(computation['content'])
 
             if (target_type == "string"):
-                return str(content)
+                if (origin_type == "bool"):
+                    # Python would return True and False by default.
+                    return "true" if content else "false"
+                else:
+                    return str(content)
             elif (target_type == "float"):
                 return float(content)
             elif (target_type == "bool"):
