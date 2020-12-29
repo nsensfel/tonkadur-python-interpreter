@@ -17,19 +17,19 @@ parser.add_argument(
     help = 'Wyrd JSON file to load.',
 )
 
-def display_rich_text (rich_text):
+def display_text (text):
     str_content = ""
 
-    if (not (rich_text['effect'] is None)):
-        str_content += "{(" + str(rich_text['effect']) + ") "
+    if (not (text['effect'] is None)):
+        str_content += "{(" + str(text['effect']) + ") "
 
-    for c in rich_text['content']:
+    for c in text['content']:
         if (isinstance(c, str)):
             str_content += c
         else:
-            str_content += display_rich_text(c)
+            str_content += display_text(c)
 
-    if (not (rich_text['effect'] is None)):
+    if (not (text['effect'] is None)):
         str_content += "}"
     return str_content
 
@@ -45,11 +45,11 @@ try:
             print("Program ended")
             break
         elif (result_category == "display"):
-            print(display_rich_text(result['content']))
+            print(display_text(result['content']))
         elif (result_category == "prompt_integer"):
             while True:
                 user_input = input(
-                    display_rich_text(result['label'])
+                    display_text(result['label'])
                     + " "
                     + "["
                     + str(result['min'])
@@ -70,7 +70,7 @@ try:
         elif (result_category == "prompt_string"):
             while True:
                 user_input = input(
-                    display_rich_text(result['label'])
+                    display_text(result['label'])
                     + " "
                     + "["
                     + str(result['min'])
@@ -88,24 +88,27 @@ try:
             state.store_string(user_input)
 
         elif (result_category == "assert"):
-            print("Assert failed at line " + str(result['line']) + ":" + str(display_rich_text(result['message'])))
+            print(
+                "Assert failed at line "
+                + str(result['line'])
+                + ":"
+                + str(display_text(result['message']))
+            )
             print(str(state.memory))
-        elif (result_category == "resolve_choices"):
+        elif (result_category == "resolve_choice"):
             current_choice = 0;
 
-            for choice in result['choices']:
+            for choice in result['options']:
                 if (choice["category"] == "option"):
                     print(
                         str(current_choice)
                         + ". "
-                        + display_rich_text(choice["label"])
+                        + display_text(choice["label"])
                     )
                 current_choice += 1
 
             user_choice = input("Your choice? ")
             state.resolve_choice_to(int(user_choice))
-        elif (result_category == "event"):
-            print("Unhandled event:" + str(result))
 
 except:
     print("failed at line " + str(state.program_counter) + ".\n")

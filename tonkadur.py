@@ -11,7 +11,7 @@ class Tonkadur:
             return 0.0
         elif (typedef['category'] == "int"):
             return 0
-        elif (typedef['category'] == "rich_text"):
+        elif (typedef['category'] == "text"):
             result = dict()
             result['content'] = []
             result['effect'] = None
@@ -36,7 +36,7 @@ class Tonkadur:
         self.program_counter = 0
         self.allocated_data = 0
         self.last_choice_index = -1
-        self.available_choices = []
+        self.available_options = []
         self.memorized_target = []
 
         with open(json_file, 'r') as f:
@@ -62,7 +62,7 @@ class Tonkadur:
     def compute (self, computation):
         computation_category = computation['category']
 
-        if (computation_category == "add_rich_text_effect"):
+        if (computation_category == "add_text_effect"):
             effect = dict()
             effect['name'] = computation['effect']
             effect['parameters'] = []
@@ -172,7 +172,7 @@ class Tonkadur:
             base = self.compute(computation['base']).copy()
             base.append(self.compute(computation['extra']))
             return base
-        elif (computation_category == "rich_text"):
+        elif (computation_category == "text"):
             result = dict()
             result['effect'] = None
             result['content'] = []
@@ -186,6 +186,10 @@ class Tonkadur:
             result['content'] = ['\n']
 
             return result
+        elif (computation_category == "extra_computation"):
+            print("[E] Unhandled extra computation " + computation['name'])
+
+            return None
         elif (computation_category == "size"):
             target = self.memory
             access = self.compute(computation['reference'])
@@ -214,7 +218,7 @@ class Tonkadur:
             print("Unknown Wyrd computation: \"" + computation_category + "\"")
 
     def resolve_choice_to (self, index):
-        self.available_choices = []
+        self.available_options = []
         self.last_choice_index = index
 
     def store_integer (self, value):
@@ -247,15 +251,15 @@ class Tonkadur:
             instruction_category = instruction['category']
             #print("instruction:" + str(instruction))
 
-            if (instruction_category == "add_choice"):
+            if (instruction_category == "add_text_option"):
                 result = dict()
-                result["category"] = "option"
+                result["category"] = "text_option"
                 result["label"] = self.compute(instruction['label'])
-                self.available_choices.append(result)
+                self.available_options.append(result)
                 self.program_counter += 1
-            elif (instruction_category == "add_event_input"):
+            elif (instruction_category == "add_event_option"):
                 result = dict()
-                result["category"] = "event"
+                result["category"] = "event_option"
                 result["name"] = instruction["event"]
                 params = []
 
@@ -263,7 +267,7 @@ class Tonkadur:
                     params.append(self.compute(param))
 
                 result["parameters"] = params
-                self.available_choices.append(result)
+                self.available_options.append(result)
                 self.program_counter += 1
             elif (instruction_category == "assert"):
                 condition = self.compute(instruction['condition'])
@@ -289,10 +293,10 @@ class Tonkadur:
                 result["category"] = "end"
 
                 return result
-            elif (instruction_category == "event_call"):
+            elif (instruction_category == "extra_instruction"):
                 result = dict()
-                result["category"] = "event"
-                result["name"] = instruction["event"]
+                result["category"] = "extra_instruction"
+                result["name"] = instruction["name"]
                 params = []
 
                 for param in instruction['parameters']:
@@ -301,6 +305,9 @@ class Tonkadur:
                 result["parameters"] = params
 
                 self.program_counter += 1
+
+                print("[E] Unhandled extra instruction " + str(result))
+
                 return result
             elif (instruction_category == "remove"):
                 pre_val = self.memory
@@ -316,10 +323,10 @@ class Tonkadur:
                 del pre_val[last_access]
 
                 self.program_counter += 1
-            elif (instruction_category == "resolve_choices"):
+            elif (instruction_category == "resolve_choice"):
                 result = dict()
-                result["category"] = "resolve_choices"
-                result["choices"] = self.available_choices
+                result["category"] = "resolve_choice"
+                result["options"] = self.available_options
                 self.program_counter += 1
 
                 return result
