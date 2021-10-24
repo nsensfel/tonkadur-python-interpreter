@@ -99,7 +99,7 @@ try:
             current_choice = 0;
 
             for choice in result['options']:
-                if (choice["category"] == "option"):
+                if (choice["category"] == "text_option"):
                     print(
                         str(current_choice)
                         + ". "

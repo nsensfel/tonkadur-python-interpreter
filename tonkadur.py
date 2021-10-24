@@ -177,7 +177,16 @@ class Tonkadur:
             result['effect'] = None
             result['content'] = []
             for c in computation['content']:
-                result['content'].append(self.compute(c))
+                cc = self.compute(c)
+
+                if (
+                    (type(cc) is dict)
+                    and ('effect' in cc)
+                    and cc['effect'] == None
+                ):
+                    result['content'].extend(cc['content'])
+                else:
+                    result['content'].append(cc)
 
             return result
         elif (computation_category == "newline"):
@@ -187,7 +196,7 @@ class Tonkadur:
 
             return result
         elif (computation_category == "extra_computation"):
-            print("[E] Unhandled extra computation " + computation['name'])
+            print("[E] Unhandled extra computation " + str(computation))
 
             return None
         elif (computation_category == "size"):
@@ -206,8 +215,8 @@ class Tonkadur:
             access = self.compute(computation['reference'])
             #print("(value_of " + str(access) + ")")
             for addr in access:
-               # print("Reading " + str(addr) + " of " + str(target))
-               # print("addr = " + str(addr))
+                #print("Reading " + str(addr) + " of " + str(target))
+                #print("addr = " + str(addr))
                 target = target[addr]
                # if (isinstance(target, list)):
                #     print("That's a list.")
