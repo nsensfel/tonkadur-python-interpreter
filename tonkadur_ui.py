@@ -87,6 +87,26 @@ try:
                     print("Input size not within range.")
             state.store_string(user_input)
 
+        elif (result_category == "prompt_command"):
+            while True:
+                user_input = input(
+                    display_text(result['label'])
+                    + " "
+                    + "["
+                    + str(result['min'])
+                    + ", "
+                    + str(result['max'])
+                    + "] "
+                )
+                if (
+                    (len(user_input) >= result['min'])
+                    and (len(user_input) <= result['max'])
+                ):
+                    break
+                else:
+                    print("Input size not within range.")
+            state.store_command(user_input.split(' '))
+
         elif (result_category == "assert"):
             print(
                 "Assert failed at line "

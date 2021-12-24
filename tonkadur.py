@@ -123,13 +123,8 @@ class Tonkadur:
                 return self.compute(computation['if_true'])
             else:
                 return self.compute(computation['if_false'])
-        elif (computation_category == "new"):
-            address = ".alloc." + str(self.allocated_data)
-            self.allocated_data += 1
-            self.memory[address] = self.generate_instance_of(computation['target'])
-            #print("Allocated " + str(address) + " = " + str(self.memory[address]))
-
-            return [address]
+        elif (computation_category == "get_allocable_address"):
+            return [(".alloc." + str(self.allocated_data))]
         elif (computation_category == "operation"):
             operator = computation['operator']
             x = self.compute(computation['x'])
@@ -252,6 +247,17 @@ class Tonkadur:
 
         pre_val[last_access] = value
 
+    def store_command (self, value):
+        current_val = self.memory
+
+        for access in self.memorized_target:
+            pre_val = current_val
+            last_access = access
+            if (access in current_val):
+                current_val = current_val[access]
+
+        pre_val[last_access] = value
+
     def run (self):
         while True:
             #print("\nmemory: " + str(self.memory))
@@ -328,7 +334,7 @@ class Tonkadur:
                     last_access = access
                     current_val = current_val[access]
 
-                #print("Removing " + str(last_access) + " of " + str(pre_val))
+                print("Removing " + str(last_access) + " of " + str(pre_val))
                 del pre_val[last_access]
 
                 self.program_counter += 1
@@ -362,6 +368,9 @@ class Tonkadur:
                 current_val = self.memory
                 access_full = self.compute(instruction["reference"])
 
+                if (access_full == [(".alloc." + str(self.allocated_data))]):
+                    self.allocated_data += 1
+
                 for access in access_full[:-1]:
                     current_val = current_val[access]
 
@@ -371,6 +380,19 @@ class Tonkadur:
             elif (instruction_category == "prompt_integer"):
                 result = dict()
                 result["category"] = "prompt_integer"
+                result["min"] = self.compute(instruction['min'])
+                result["max"] = self.compute(instruction['max'])
+                result["label"] = self.compute(instruction['label'])
+
+                self.memorized_target = self.compute(instruction['target'])
+
+                self.program_counter += 1
+
+                return result
+
+            elif (instruction_category == "prompt_command"):
+                result = dict()
+                result["category"] = "prompt_command"
                 result["min"] = self.compute(instruction['min'])
                 result["max"] = self.compute(instruction['max'])
                 result["label"] = self.compute(instruction['label'])
